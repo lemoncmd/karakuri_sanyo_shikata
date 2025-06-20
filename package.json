@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build:grammar": "npx nearleyc src/grammar.ne -o built-grammar/grammar.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,7 +20,11 @@
   },
   "homepage": "https://github.com/lemoncmd/karakuri_sanyo_shikata#readme",
   "devDependencies": {
+    "@types/nearley": "^2.11.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "nearley": "^2.20.1"
   }
 }
