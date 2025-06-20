@@ -1,3 +1,5 @@
+@preprocessor typescript
+
 MAIN -> FUNC:* {% id %}
 FUNC -> "一、" (PARAMS "を以" {% id %}):? IDENT "之儀" _ STATEMENTS _ IDENT "之儀仍如件" _ {% (d,l,r) => {
 	if(d[2] != d[7]) return r;
@@ -25,9 +27,9 @@ STATEMENT_WITH_KOTO ->
 | WHILE_STATEMENT {% id %}
 
 
-IF_STATEMENT -> "若" CONDITION_EXPRESSION "候ハヽ" _ STATEMENTS ("て" _ "不然若" _ CONDITION_EXPRESSION "候ハヽ" _ STATEMENTS):* ("て" _ "不然" _ STATEMENTS {% d => d[4] %}):? "事" _ {% d => {
+IF_STATEMENT -> "若" CONDITION_EXPRESSION "候ハヽ" _ STATEMENTS ("て" _ "不然若" _ CONDITION_EXPRESSION "候ハヽ" _ STATEMENTS {% d => ({cond: d[4], body: d[7]}) %}):* ("て" _ "不然" _ STATEMENTS {% d => d[4] %}):? "事" _ {% d => {
   const conds = [{cond: d[1], body: d[4]}];
-  if(d[5]) conds.push(...d[5].map(x => ({cond: x[4], body: x[7]})));
+  if(d[5]) conds.push(...d[5]);
   return {type: "if", conds, else: d[6]};
 } %}
 

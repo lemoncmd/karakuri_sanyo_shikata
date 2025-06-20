@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:grammar": "npx nearleyc src/grammar.ne -o built-grammar/grammar.js",
+    "build:grammar": "npx nearleyc src/grammar.ne -o built-grammar/grammar.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

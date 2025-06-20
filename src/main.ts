@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import * as grammar from "../built-grammar/grammar.js";
+import grammar from "../built-grammar/grammar.ts";
 import * as nearley from "nearley";
 
 const input = fs.readFileSync("test/sample.kss", "utf-8");
