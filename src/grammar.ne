@@ -45,7 +45,7 @@ ARGS -> (VALUE "、" {% id %}):* VALUE {% d => [...d[0], d[1]] %}
 VALUE ->
   BOOL_LITERAL {% id %}
 | STRING_LITERAL {% id %}
-| IDENT {% d => ({type: "ident", value: d[0]}) %}
+| IDENT {% d => ({type: "ident", name: d[0]}) %}
 | CONDITION_EXPRESSION "候や否や" {% id %}
 | FUNC_CALL_ITASHI "候段" {% id %}
 
