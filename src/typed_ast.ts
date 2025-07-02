@@ -28,13 +28,12 @@ export interface ReturnStmt {
 }
 export interface DeclareStmt {
   type: "declare";
-  dtype: Type;
-  name: string;
+  variable: Var;
   value: Expr | null;
 }
 export interface AssignStmt {
   type: "assign";
-  name: string;
+  variable: Var;
   value: Expr;
 }
 export interface CallStmt {
@@ -52,8 +51,7 @@ export interface Condition {
 }
 export interface ForStmt {
   type: "for";
-  dtype: Type;
-  name: string;
+  variable: Var;
   init: Expr;
   end: Expr;
   call: CallExpr;
@@ -147,5 +145,5 @@ export interface StringLiteral {
 }
 export interface Ident {
   type: "ident";
-  name: string;
+  variable: Var;
 }

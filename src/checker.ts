@@ -74,38 +74,136 @@ class Checker {
           throw "";
         }
         const name = stmt.name;
+        const variable = { dtype: concatType, name };
         if (this.scope.at(-1)?.has(name)) {
-          this.scope.at(-1)?.set(name, { dtype: concatType, name });
+          this.scope.at(-1)?.set(name, variable);
         } else {
           throw `${name} is already declared. 既ニ${name}被宣言候`;
         }
-        return { type: "declare", dtype: concatType, name, value };
+        return { type: "declare", variable, value };
       }
-      case "assign":
-      case "if":
-      case "for":
-      case "while":
-      case "call":
+      case "assign": {
+        const variable = this.findVar(stmt.name);
+        if (variable === null) {
+          throw "";
+        }
+
+        const [value, type] = this.constructExpr(stmt.value);
+        const concatType = ty.concatType(variable.dtype, type);
+        if (concatType === null) {
+          throw "";
+        }
+
+        return { type: "assign", variable, value };
+      }
+      case "if": {
+        const conds = stmt.conds.map((condition): typed_ast.Condition => {
+          const [cond, type] = this.constructExpr(condition.cond);
+          if (!["unknown", "bool"].includes(type.type)) {
+            throw "";
+          }
+          this.scope.push(new Map());
+          const body = condition.body
+            .map((stmt) => this.constructStatement(stmt))
+            .filter((stmt) => stmt !== null);
+          this.scope.pop();
+          return { cond, body };
+        });
+
+        this.scope.push(new Map());
+        const els =
+          stmt.else &&
+          stmt.else
+            .map((stmt) => this.constructStatement(stmt))
+            .filter((stmt) => stmt !== null);
+        this.scope.pop();
+
+        return { type: "if", conds, else: els };
+      }
+      case "for": {
+        const variable: typed_ast.Var = {
+          name: stmt.name,
+          dtype: convertDType(stmt.dtype),
+        };
+        this.scope.push(new Map([[stmt.name, variable]]));
+        this.scope.pop();
         throw "todo";
+      }
+      case "while": {
+        const [cond, type] = this.constructExpr(stmt.cond);
+        if (!["unknown", "bool"].includes(type.type)) {
+          throw "";
+        }
+        this.scope.push(new Map());
+        const body = stmt.body
+          .map((stmt) => this.constructStatement(stmt))
+          .filter((stmt) => stmt !== null);
+        this.scope.pop();
+        return { type: "while", cond, body };
+      }
+      case "call":
+        return {
+          type: "call",
+          call: this.constructExpr(stmt)[0] as typed_ast.CallExpr,
+        };
     }
   }
   constructExpr(expr: ast.Expr): [typed_ast.Expr, ty.Type] {
     switch (expr.type) {
       case "call":
+        throw "todo";
       case "and":
-      case "or":
-      case "not":
+      case "or": {
+        const [left, leftType] = this.constructExpr(expr.left);
+        const [right, rightType] = this.constructExpr(expr.right);
+        if (!["unknown", "bool"].includes(leftType.type)) {
+          throw "";
+        }
+        if (!["unknown", "bool"].includes(rightType.type)) {
+          throw "";
+        }
+        return [{ type: expr.type, left, right }, { type: "bool" }];
+      }
+      case "not": {
+        const [value, type] = this.constructExpr(expr.value);
+        if (!["unknown", "bool"].includes(type.type)) {
+          throw "";
+        }
+        return [{ type: expr.type, value }, { type: "bool" }];
+      }
       case "eq":
       case "ne":
       case "gt":
       case "lt":
       case "ge":
-      case "le":
+      case "le": {
+        const [left, leftType] = this.constructExpr(expr.left);
+        const [right, rightType] = this.constructExpr(expr.right);
+        const dtype = ty.concatType(leftType, rightType);
+        if (dtype === null) {
+          throw "";
+        }
+        return [{ type: expr.type, left, right, dtype }, { type: "bool" }];
+      }
       case "bool":
+        return [expr, { type: "bool" }];
       case "string":
-      case "ident":
-        throw "todo";
+        return [expr, { type: "string" }];
+      case "ident": {
+        const variable = this.findVar(expr.name);
+        if (variable === null) {
+          throw "";
+        }
+        return [{ type: "ident", variable }, variable.dtype];
+      }
     }
+  }
+  findVar(name: string): typed_ast.Var | null {
+    for (let block of this.scope.toReversed()) {
+      const maybeVar = block.get(name);
+      if (maybeVar) return maybeVar;
+    }
+    return null;
   }
   deduceType() {}
 }
