@@ -2,7 +2,7 @@
 
 MAIN -> FUNC:* {% id %}
 FUNC -> "一、" (PARAMS "を以" {% id %}):? IDENT "之儀" _ STATEMENTS _ IDENT "之儀仍如件" _ {% (d,l,r) => {
-	if(d[2] != d[7]) return r;
+	if(d[2] !== d[7]) return r;
 	return {type: "func", params: d[1] ?? [], name: d[2], body: d[5]}
 } %}
 

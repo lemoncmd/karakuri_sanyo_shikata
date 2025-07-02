@@ -1,38 +1,34 @@
-export type ASTType = Func[];
+import { FuncType, Type } from "./type";
+
+export type TypedASTType = Map<string, Func>;
 
 export interface Func {
-  type: "func";
-  params: Param[];
-  name: string;
+  dtype: FuncType;
+  params: Var[];
   body: Statement[];
 }
-export interface Param {
-  dtype: DType;
+
+export interface Var {
+  dtype: Type;
   name: string;
 }
 
-export type DType = "数" | "文句" | "陰陽";
-
 export type Statement =
-  | NoneStmt
   | ReturnStmt
   | DeclareStmt
   | AssignStmt
-  | CallExpr
+  | CallStmt
   | IfStmt
   | ForStmt
   | WhileStmt;
 
-export interface NoneStmt {
-  type: "none";
-}
 export interface ReturnStmt {
   type: "return";
   value: Expr;
 }
 export interface DeclareStmt {
   type: "declare";
-  dtype: DType;
+  dtype: Type;
   name: string;
   value: Expr | null;
 }
@@ -40,6 +36,10 @@ export interface AssignStmt {
   type: "assign";
   name: string;
   value: Expr;
+}
+export interface CallStmt {
+  type: "call";
+  call: CallExpr;
 }
 export interface IfStmt {
   type: "if";
@@ -52,7 +52,7 @@ export interface Condition {
 }
 export interface ForStmt {
   type: "for";
-  dtype: DType;
+  dtype: Type;
   name: string;
   init: Expr;
   end: Expr;
@@ -82,6 +82,7 @@ export type Expr =
 
 export interface CallExpr {
   type: "call";
+  dtype: FuncType;
   args: Expr[];
   funcname: string;
 }
@@ -102,31 +103,37 @@ export interface NotExpr {
 }
 export interface EqExpr {
   type: "eq";
+  dtype: Type;
   left: Expr;
   right: Expr;
 }
 export interface NeExpr {
   type: "ne";
+  dtype: Type;
   left: Expr;
   right: Expr;
 }
 export interface GtExpr {
   type: "gt";
+  dtype: Type;
   left: Expr;
   right: Expr;
 }
 export interface LtExpr {
   type: "lt";
+  dtype: Type;
   left: Expr;
   right: Expr;
 }
 export interface GeExpr {
   type: "ge";
+  dtype: Type;
   left: Expr;
   right: Expr;
 }
 export interface LeExpr {
   type: "le";
+  dtype: Type;
   left: Expr;
   right: Expr;
 }
