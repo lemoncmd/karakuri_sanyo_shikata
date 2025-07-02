@@ -6,26 +6,26 @@ export type Type =
   | FuncType
   | UnknownType;
 
-export interface VoidType {
+export type VoidType = {
   type: "void";
-}
-export interface NumberType {
+};
+export type NumberType = {
   type: "number";
-}
-export interface StringType {
+};
+export type StringType = {
   type: "string";
-}
-export interface BoolType {
+};
+export type BoolType = {
   type: "bool";
-}
-export interface UnknownType {
+};
+export type UnknownType = {
   type: "unknown";
-}
-export interface FuncType {
+};
+export type FuncType = {
   type: "func";
   params: Type[];
   res: Type;
-}
+};
 
 export function concatType(ty1: Type, ty2: Type): Type | null {
   if (ty1.type === "unknown") return ty2;

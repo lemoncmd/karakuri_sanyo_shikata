@@ -2,16 +2,16 @@ import { FuncType, Type } from "./type";
 
 export type TypedASTType = Map<string, Func>;
 
-export interface Func {
+export type Func = {
   dtype: FuncType;
   params: Var[];
   body: Statement[];
-}
+};
 
-export interface Var {
+export type Var = {
   dtype: Type;
   name: string;
-}
+};
 
 export type Statement =
   | ReturnStmt
@@ -22,46 +22,46 @@ export type Statement =
   | ForStmt
   | WhileStmt;
 
-export interface ReturnStmt {
+export type ReturnStmt = {
   type: "return";
   value: Expr;
-}
-export interface DeclareStmt {
+};
+export type DeclareStmt = {
   type: "declare";
   variable: Var;
   value: Expr | null;
-}
-export interface AssignStmt {
+};
+export type AssignStmt = {
   type: "assign";
   variable: Var;
   value: Expr;
-}
-export interface CallStmt {
+};
+export type CallStmt = {
   type: "call";
   call: CallExpr;
-}
-export interface IfStmt {
+};
+export type IfStmt = {
   type: "if";
   conds: Condition[];
   else: Statement[] | null;
-}
-export interface Condition {
+};
+export type Condition = {
   cond: Expr;
   body: Statement[];
-}
-export interface ForStmt {
+};
+export type ForStmt = {
   type: "for";
   variable: Var;
   init: Expr;
   end: Expr;
   call: CallExpr;
   body: Statement[];
-}
-export interface WhileStmt {
+};
+export type WhileStmt = {
   type: "while";
   cond: Expr;
   body: Statement[];
-}
+};
 
 export type Expr =
   | BoolLiteral
@@ -78,72 +78,72 @@ export type Expr =
   | LeExpr
   | CallExpr;
 
-export interface CallExpr {
+export type CallExpr = {
   type: "call";
   dtype: FuncType;
   args: Expr[];
   funcname: string;
-}
+};
 
-export interface AndExpr {
+export type AndExpr = {
   type: "and";
   left: Expr;
   right: Expr;
-}
-export interface OrExpr {
+};
+export type OrExpr = {
   type: "or";
   left: Expr;
   right: Expr;
-}
-export interface NotExpr {
+};
+export type NotExpr = {
   type: "not";
   value: Expr;
-}
-export interface EqExpr {
+};
+export type EqExpr = {
   type: "eq";
   dtype: Type;
   left: Expr;
   right: Expr;
-}
-export interface NeExpr {
+};
+export type NeExpr = {
   type: "ne";
   dtype: Type;
   left: Expr;
   right: Expr;
-}
-export interface GtExpr {
+};
+export type GtExpr = {
   type: "gt";
   dtype: Type;
   left: Expr;
   right: Expr;
-}
-export interface LtExpr {
+};
+export type LtExpr = {
   type: "lt";
   dtype: Type;
   left: Expr;
   right: Expr;
-}
-export interface GeExpr {
+};
+export type GeExpr = {
   type: "ge";
   dtype: Type;
   left: Expr;
   right: Expr;
-}
-export interface LeExpr {
+};
+export type LeExpr = {
   type: "le";
   dtype: Type;
   left: Expr;
   right: Expr;
-}
-export interface BoolLiteral {
+};
+export type BoolLiteral = {
   type: "bool";
   value: boolean;
-}
-export interface StringLiteral {
+};
+export type StringLiteral = {
   type: "string";
   value: string;
-}
-export interface Ident {
+};
+export type Ident = {
   type: "ident";
   variable: Var;
-}
+};
