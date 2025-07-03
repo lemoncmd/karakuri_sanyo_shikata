@@ -71,7 +71,7 @@ class Checker {
 
         const concatType = ty.concatType(type, convertDType(stmt.dtype));
         if (concatType === null) {
-          throw "";
+          throw "The initial value and the type of the variable is different. 初期値と変数之型相異候";
         }
         const name = stmt.name;
         const variable = { dtype: concatType, name };
@@ -85,13 +85,13 @@ class Checker {
       case "assign": {
         const variable = this.findVar(stmt.name);
         if (variable === null) {
-          throw "";
+          throw `The variable ${stmt.name} not found. 変数${stmt.name}不被見出候`;
         }
 
         const [value, type] = this.constructExpr(stmt.value);
         const concatType = ty.concatType(variable.dtype, type);
         if (concatType === null) {
-          throw "";
+          throw "The value and the type of the variable is different. 値と変数之型相異候";
         }
 
         return { type: "assign", variable, value };
@@ -100,7 +100,7 @@ class Checker {
         const conds = stmt.conds.map((condition): typed_ast.Condition => {
           const [cond, type] = this.constructExpr(condition.cond);
           if (!["unknown", "bool"].includes(type.type)) {
-            throw "";
+            throw "The condtional expression is not bool. 条件式陰陽に無御座候";
           }
           this.scope.push(new Map());
           const body = condition.body
@@ -132,7 +132,7 @@ class Checker {
       case "while": {
         const [cond, type] = this.constructExpr(stmt.cond);
         if (!["unknown", "bool"].includes(type.type)) {
-          throw "";
+          throw "The condtional expression is not bool. 条件式陰陽に無御座候";
         }
         this.scope.push(new Map());
         const body = stmt.body
@@ -157,17 +157,17 @@ class Checker {
         const [left, leftType] = this.constructExpr(expr.left);
         const [right, rightType] = this.constructExpr(expr.right);
         if (!["unknown", "bool"].includes(leftType.type)) {
-          throw "";
+          throw "The left condtional expression is not bool. 左条件式陰陽に無御座候";
         }
         if (!["unknown", "bool"].includes(rightType.type)) {
-          throw "";
+          throw "The right condtional expression is not bool. 右条件式陰陽に無御座候";
         }
         return [{ type: expr.type, left, right }, { type: "bool" }];
       }
       case "not": {
         const [value, type] = this.constructExpr(expr.value);
         if (!["unknown", "bool"].includes(type.type)) {
-          throw "";
+          throw "The condtional expression is not bool. 条件式陰陽に無御座候";
         }
         return [{ type: expr.type, value }, { type: "bool" }];
       }
@@ -181,7 +181,7 @@ class Checker {
         const [right, rightType] = this.constructExpr(expr.right);
         const dtype = ty.concatType(leftType, rightType);
         if (dtype === null) {
-          throw "";
+          throw "The type of the expressions is different. 左式と右式之型相異候";
         }
         return [{ type: expr.type, left, right, dtype }, { type: "bool" }];
       }
@@ -192,7 +192,7 @@ class Checker {
       case "ident": {
         const variable = this.findVar(expr.name);
         if (variable === null) {
-          throw "";
+          throw `The variable ${expr.name} not found. 変数${expr.name}不被見出候`;
         }
         return [{ type: "ident", variable }, variable.dtype];
       }
