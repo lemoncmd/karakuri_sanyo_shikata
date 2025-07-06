@@ -125,9 +125,23 @@ class Checker {
           name: stmt.name,
           dtype: convertDType(stmt.dtype),
         };
+        const [init, initType] = this.constructExpr(stmt.init);
+        if (ty.concatType(variable.dtype, initType) === null) {
+          throw "Init type is different. 初期値之型相異候";
+        }
+        const [end, endType] = this.constructExpr(stmt.end);
+        if (ty.concatType(variable.dtype, endType) === null) {
+          throw "End type is different. 終値之型相異候";
+        }
+        const call = this.constructExpr(stmt.call)[0] as typed_ast.CallExpr;
+        call.args.unshift({ type: "ident", variable });
+        call.dtype.params.unshift(variable.dtype);
         this.scope.push(new Map([[stmt.name, variable]]));
+        const body = stmt.body
+          .map((stmt) => this.constructStatement(stmt))
+          .filter((stmt) => stmt !== null);
         this.scope.pop();
-        throw "todo";
+        return { type: "for", body, call, end, init, variable };
       }
       case "while": {
         const [cond, type] = this.constructExpr(stmt.cond);
@@ -150,8 +164,12 @@ class Checker {
   }
   constructExpr(expr: ast.Expr): [typed_ast.Expr, ty.Type] {
     switch (expr.type) {
-      case "call":
-        throw "todo";
+      case "call": {
+        const args_and_types = expr.args.map(arg => this.constructExpr(arg));
+        const args = args_and_types.map(arg => arg[0]);
+        const types = args_and_types.map(arg => arg[1]);
+        return [{ type: "call", dtype: { type: "func", params: types, res: { type: "unknown" } }, args, funcname: expr.funcname }, { type: "unknown" }];
+      }
       case "and":
       case "or": {
         const [left, leftType] = this.constructExpr(expr.left);
@@ -205,5 +223,5 @@ class Checker {
     }
     return null;
   }
-  deduceType() {}
+  deduceType() { }
 }
