@@ -20,7 +20,6 @@ test("陽を差戻関数", () => {
 値之儀仍如件
     `),
   );
-  console.log(module);
   expect(typeof module.値).toBe("function");
   expect(module.値).not.toThrow();
   expect(module.値()).toBe(true);
