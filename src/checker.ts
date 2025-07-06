@@ -165,10 +165,18 @@ class Checker {
   constructExpr(expr: ast.Expr): [typed_ast.Expr, ty.Type] {
     switch (expr.type) {
       case "call": {
-        const args_and_types = expr.args.map(arg => this.constructExpr(arg));
-        const args = args_and_types.map(arg => arg[0]);
-        const types = args_and_types.map(arg => arg[1]);
-        return [{ type: "call", dtype: { type: "func", params: types, res: { type: "unknown" } }, args, funcname: expr.funcname }, { type: "unknown" }];
+        const args_and_types = expr.args.map((arg) => this.constructExpr(arg));
+        const args = args_and_types.map((arg) => arg[0]);
+        const types = args_and_types.map((arg) => arg[1]);
+        return [
+          {
+            type: "call",
+            dtype: { type: "func", params: types, res: { type: "unknown" } },
+            args,
+            funcname: expr.funcname,
+          },
+          { type: "unknown" },
+        ];
       }
       case "and":
       case "or": {
@@ -223,5 +231,5 @@ class Checker {
     }
     return null;
   }
-  deduceType() { }
+  deduceType() {}
 }

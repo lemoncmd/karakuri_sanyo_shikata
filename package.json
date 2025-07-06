@@ -20,11 +20,16 @@
   },
   "homepage": "https://github.com/lemoncmd/karakuri_sanyo_shikata#readme",
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/nearley": "^2.11.5",
+    "jest": "^30.0.4",
+    "require-from-string": "^2.0.2",
+    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@types/require-from-string": "^1.2.3",
     "nearley": "^2.20.1"
   }
 }

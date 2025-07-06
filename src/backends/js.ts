@@ -23,10 +23,11 @@ class Generator {
 
   generate(ast: TypedASTType): string {
     ast.forEach((func, name) => this.generateFunc(func, name));
+    this.println(`module.exports = { ${[...ast.keys()].join(", ")} }`);
     return this.result;
   }
   generateFunc(func: Func, name: string) {
-    this.print(`export function ${name}(`);
+    this.print(`function ${name}(`);
     this.print(func.params.map((param) => param.name).join(", "));
     this.println(") {");
     this.indent++;
