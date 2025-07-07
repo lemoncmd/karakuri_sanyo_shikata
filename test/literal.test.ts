@@ -37,3 +37,12 @@ test("陰を諄く差戻関数", () => {
   expect(module.値).not.toThrow();
   expect(module.値()).toBe(false);
 });
+test("無御座変数不可見", () => {
+  expect(() =>
+    compile(`
+一、甲之儀
+乙を差戻し候
+甲之儀仍如件
+    `),
+  ).toThrow("変数乙不被見出候");
+});

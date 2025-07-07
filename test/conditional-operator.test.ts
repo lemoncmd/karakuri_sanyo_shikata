@@ -36,7 +36,7 @@ test("或陰陽、別之文句に御座候や否や者不可問", () => {
 陽、〽何奴ぢやに御座候や否やを差戻し候
 甲之儀仍如件
     `),
-  ).toThrow();
+  ).toThrow("左式と右式之型相異候");
 });
 test("或陰陽、別之陰陽に無御座候や否やを問関数", () => {
   const module = requireFromString(
@@ -108,4 +108,27 @@ test("或陰陽ニ非事を問関数", () => {
   expect(module.非).not.toThrow();
   expect(module.非(true)).toBe(false);
   expect(module.非(false)).toBe(true);
+});
+test("非陰陽者且又ハニ非に不可問", () => {
+  expect(() =>
+    compile(`
+一、甲之儀
+陽に御座候且〽何奴ぢやに御座候や否やを差戻し候
+甲之儀仍如件
+    `),
+  ).toThrow("右条件式陰陽に無御座候");
+  expect(() =>
+    compile(`
+一、甲之儀
+〽何奴ぢやに御座候又ハ陽に御座候や否やを差戻し候
+甲之儀仍如件
+    `),
+  ).toThrow("左条件式陰陽に無御座候");
+  expect(() =>
+    compile(`
+一、甲之儀
+〽何奴ぢやに御座候ニ非候や否やを差戻し候
+甲之儀仍如件
+    `),
+  ).toThrow("条件式陰陽に無御座候");
 });

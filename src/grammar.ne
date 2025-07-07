@@ -68,7 +68,7 @@ BOOL_LITERAL ->
   "陰" {% d => ({type: "bool", value: false}) %}
 | "陽" {% d => ({type: "bool", value: true}) %}
 
-STRING_LITERAL -> "〽" [^\s〽、]:* {% d => ({type: "string", value: d[1].join("")}) %}
+STRING_LITERAL -> "〽" [^\s〽、候云]:* {% d => ({type: "string", value: d[1].join("")}) %}
 
 IDENT -> [^\s〽、陰陽儀或候以]:+ {% d => d[0].join("") %}
 

@@ -12,6 +12,20 @@ test("何も不為関数", () => {
   expect(typeof module.無).toBe("function");
   expect(module.無).not.toThrow();
 });
+test("何も不辺関数呼付", () => {
+  const module = requireFromString(
+    compile(`
+一、無之儀
+如斯御座候
+無之儀仍如件
+一、子之儀
+無之儀を致し候
+子之儀仍如件
+    `),
+  );
+  expect(typeof module.子).toBe("function");
+  expect(module.子).not.toThrow();
+});
 test("単変数関数", () => {
   const module = requireFromString(
     compile(`
@@ -70,4 +84,14 @@ test("多変数関数呼付", () => {
   expect(typeof module.丑).toBe("function");
   expect(module.丑).not.toThrow();
   expect(module.丑("甲", "乙", "丙")).toBe("丙");
+});
+test("相異る型之値不可差戻", () => {
+  expect(() =>
+    compile(`
+一、甲之儀
+陽を差戻し候て
+〽あヽを差戻し候
+甲之儀仍如件
+    `),
+  ).toThrow("戻値之型先と相異候");
 });

@@ -75,7 +75,7 @@ class Checker {
         }
         const name = stmt.name;
         const variable = { dtype: concatType, name };
-        if (this.scope.at(-1)?.has(name)) {
+        if (!this.scope.at(-1)?.has(name)) {
           this.scope.at(-1)?.set(name, variable);
         } else {
           throw `${name} is already declared. 既ニ${name}被宣言候`;

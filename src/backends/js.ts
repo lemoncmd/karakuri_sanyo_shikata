@@ -81,13 +81,13 @@ class Generator {
         );
         this.print(`${stmt.variable.name} !== ${this.generateExpr(stmt.end)};`);
         this.println(
-          `${stmt.variable.name} = ${stmt.call.funcname}(${stmt.variable.name}, ${stmt.call.args.map((arg) => this.generateExpr(arg)).join(", ")})) {`,
+          `${stmt.variable.name} = ${stmt.call.funcname}(${stmt.call.args.map((arg) => this.generateExpr(arg)).join(", ")})) {`,
         );
         this.indent++;
         stmt.body.forEach((stmt) => this.generateStmt(stmt));
         this.indent--;
         this.println("}");
-        throw "todo";
+        break;
       case "while":
         this.println(`while (${this.generateExpr(stmt.cond)}) {`);
         this.indent++;
