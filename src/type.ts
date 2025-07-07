@@ -30,7 +30,7 @@ export type FuncType = {
 export function concatType(ty1: Type, ty2: Type): Type | null {
   if (ty1.type === "unknown") return ty2;
   if (ty2.type === "unknown") return ty1;
-  if (ty1.type === ty2.type) return null;
+  if (ty1.type !== ty2.type) return null;
   if (ty1.type !== "func") return ty1;
   const ty2f = ty2 as FuncType;
   if (ty1.params.length !== ty2f.params.length) return null;
