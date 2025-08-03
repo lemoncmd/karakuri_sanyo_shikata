@@ -135,7 +135,6 @@ class Checker {
         }
         const call = this.constructExpr(stmt.call)[0] as typed_ast.CallExpr;
         call.args.unshift({ type: "ident", variable });
-        call.dtype.params.unshift(variable.dtype);
         this.scope.push(new Map([[stmt.name, variable]]));
         const body = stmt.body
           .map((stmt) => this.constructStatement(stmt))
@@ -165,13 +164,10 @@ class Checker {
   constructExpr(expr: ast.Expr): [typed_ast.Expr, ty.Type] {
     switch (expr.type) {
       case "call": {
-        const args_and_types = expr.args.map((arg) => this.constructExpr(arg));
-        const args = args_and_types.map((arg) => arg[0]);
-        const types = args_and_types.map((arg) => arg[1]);
+        const args = expr.args.map((arg) => this.constructExpr(arg)[0]);
         return [
           {
             type: "call",
-            dtype: { type: "func", params: types, res: { type: "unknown" } },
             args,
             funcname: expr.funcname,
           },
@@ -231,5 +227,268 @@ class Checker {
     }
     return null;
   }
-  deduceType() {}
+
+  deduceType() {
+    while (
+      this.funcs
+        .values()
+        .map((func) => {
+          this.res_ty = func.dtype.res;
+          const funcDeduced = func.body
+            .map((stmt) => this.deduceStmtType(stmt))
+            .some((value) => value);
+          func.dtype.res = this.res_ty;
+          return funcDeduced;
+        })
+        .some((x) => x)
+    );
+  }
+  deduceStmtType(stmt: typed_ast.Statement): boolean {
+    switch (stmt.type) {
+      case "return": {
+        const [updated, res] = this.deduceExprType(stmt.value, this.res_ty);
+        let tyUpdated;
+        [tyUpdated, this.res_ty] = ty.tryUpdate(
+          this.res_ty,
+          res,
+          "incompatible type. 相異なる型に御座候",
+        );
+        return updated || tyUpdated;
+      }
+      case "declare": {
+        if (stmt.value !== null) {
+          const [updated, type] = this.deduceExprType(
+            stmt.value,
+            stmt.variable.dtype,
+          );
+          let tyUpdated;
+          [tyUpdated, stmt.variable.dtype] = ty.tryUpdate(
+            stmt.variable.dtype,
+            type,
+            "incompatible type. 相異なる型に御座候",
+          );
+          return updated || tyUpdated;
+        }
+        return false;
+      }
+      case "assign": {
+        const [updated, type] = this.deduceExprType(
+          stmt.value,
+          stmt.variable.dtype,
+        );
+        let tyUpdated;
+        [tyUpdated, stmt.variable.dtype] = ty.tryUpdate(
+          stmt.variable.dtype,
+          type,
+          "incompatible type. 相異なる型に御座候",
+        );
+        return updated || tyUpdated;
+      }
+      case "call":
+        return this.deduceExprType(stmt.call, { type: "unknown" })[0];
+      case "if": {
+        const condsUpdated = stmt.conds
+          .map((cond) => {
+            const [condUpdated, type] = this.deduceExprType(cond.cond, {
+              type: "bool",
+            });
+            if (type.type !== "bool")
+              throw "The condtional expression is not bool. 条件式陰陽に無御座候";
+
+            const bodyUpdated = cond.body
+              .map((stmt) => this.deduceStmtType(stmt))
+              .some((x) => x);
+
+            return condUpdated || bodyUpdated;
+          })
+          .some((x) => x);
+        const elseUpdated =
+          stmt.else === null
+            ? false
+            : stmt.else.map((stmt) => this.deduceStmtType(stmt)).some((x) => x);
+        return condsUpdated || elseUpdated;
+      }
+      case "for": {
+        const [initUpdated, initType] = this.deduceExprType(
+          stmt.init,
+          stmt.variable.dtype,
+        );
+        let initTypeUpdated;
+        [initTypeUpdated, stmt.variable.dtype] = ty.tryUpdate(
+          stmt.variable.dtype,
+          initType,
+          "Init type is different. 初期値之型相異候",
+        );
+        const [endUpdated, endType] = this.deduceExprType(
+          stmt.end,
+          stmt.variable.dtype,
+        );
+        let endTypeUpdated;
+        [endTypeUpdated, stmt.variable.dtype] = ty.tryUpdate(
+          stmt.variable.dtype,
+          endType,
+          "End type is different. 終値之型相異候",
+        );
+        const [callUpdated, callType] = this.deduceExprType(
+          stmt.call,
+          stmt.variable.dtype,
+        );
+        let callTypeUpdated;
+        [callTypeUpdated, stmt.variable.dtype] = ty.tryUpdate(
+          stmt.variable.dtype,
+          callType,
+          `Function ${stmt.call.funcname} which is called every end of loop returns differnt type. 毎々終に被呼関数${stmt.call.funcname}異る型返賜候`,
+        );
+
+        const bodyUpdated = stmt.body
+          .map((stmt) => this.deduceStmtType(stmt))
+          .some((x) => x);
+        return (
+          initUpdated ||
+          initTypeUpdated ||
+          endUpdated ||
+          endTypeUpdated ||
+          callUpdated ||
+          callTypeUpdated ||
+          bodyUpdated
+        );
+      }
+      case "while": {
+        const [condUpdated, type] = this.deduceExprType(stmt.cond, {
+          type: "bool",
+        });
+        if (type.type !== "bool")
+          throw "The condtional expression is not bool. 条件式陰陽に無御座候";
+
+        const bodyUpdated = stmt.body
+          .map((stmt) => this.deduceStmtType(stmt))
+          .some((x) => x);
+
+        return condUpdated || bodyUpdated;
+      }
+    }
+  }
+
+  deduceExprType(expr: typed_ast.Expr, hint: ty.Type): [boolean, ty.Type] {
+    switch (expr.type) {
+      case "string":
+        return ty.tryUpdate(
+          { type: "string" },
+          hint,
+          "The expression wasn't expected to be string. 文字列不可用",
+        );
+      case "bool":
+        return ty.tryUpdate(
+          { type: "bool" },
+          hint,
+          "The expression wasn't expected to be bool. 陰陽不可用",
+        );
+      case "ident": {
+        let updated;
+        return ([updated, expr.variable.dtype] = ty.tryUpdate(
+          expr.variable.dtype,
+          hint,
+          "The expression wasn't expected to be bool. 陰陽不可用",
+        ));
+      }
+      case "and":
+      case "or": {
+        const [leftUpdate, leftType] = this.deduceExprType(expr.left, {
+          type: "bool",
+        });
+        if (!["unknown", "bool"].includes(leftType.type)) {
+          throw "The left condtional expression is not bool. 左条件式陰陽に無御座候";
+        }
+        const [rightUpdate, rightType] = this.deduceExprType(expr.right, {
+          type: "bool",
+        });
+        if (!["unknown", "bool"].includes(rightType.type)) {
+          throw "The right condtional expression is not bool. 右条件式陰陽に無御座候";
+        }
+        if (!["unknown", "bool"].includes(hint.type)) {
+          throw "The expression wasn't expected to be bool. 陰陽不可用";
+        }
+        return [leftUpdate || rightUpdate, { type: "bool" }];
+      }
+      case "not": {
+        const [update, type] = this.deduceExprType(expr.value, {
+          type: "bool",
+        });
+        if (!["unknown", "bool"].includes(type.type)) {
+          throw "The left condtional expression is not bool. 左条件式陰陽に無御座候";
+        }
+        if (!["unknown", "bool"].includes(hint.type)) {
+          throw "The expression wasn't expected to be bool. 陰陽不可用";
+        }
+        return [update, { type: "bool" }];
+      }
+      case "eq":
+      case "ne":
+      case "gt":
+      case "lt":
+      case "ge":
+      case "le": {
+        const [leftUpdate, leftType] = this.deduceExprType(
+          expr.left,
+          expr.dtype,
+        );
+        let leftTypeUpdate;
+        [leftTypeUpdate, expr.dtype] = ty.tryUpdate(
+          expr.dtype,
+          leftType,
+          "The type of the expressions is different. 左式と右式之型相異候",
+        );
+
+        const [rightUpdate, rightType] = this.deduceExprType(
+          expr.right,
+          expr.dtype,
+        );
+        let rightTypeUpdate;
+        [rightTypeUpdate, expr.dtype] = ty.tryUpdate(
+          expr.dtype,
+          rightType,
+          "The type of the expressions is different. 左式と右式之型相異候",
+        );
+
+        if (!["unknown", "bool"].includes(hint.type)) {
+          throw "The expression wasn't expected to be bool. 陰陽不可用";
+        }
+
+        return [
+          leftUpdate || leftTypeUpdate || rightUpdate || rightTypeUpdate,
+          { type: "bool" },
+        ];
+      }
+      case "call": {
+        const callee = this.funcs.get(expr.funcname);
+        if (typeof callee === "undefined")
+          throw `Function ${expr.funcname} not found. 関数${expr.funcname}不被見出候`;
+
+        let resTypeUpdated;
+        [resTypeUpdated, callee.dtype.res] = ty.tryUpdate(
+          callee.dtype.res,
+          hint,
+          "Usage of function return type is different. 関数之被使様相異候",
+        );
+
+        const argsUpdated = expr.args
+          .map((arg, i) => {
+            const [argUpdated, argType] = this.deduceExprType(
+              arg,
+              callee.dtype.params[i],
+            );
+            let argTypeUpdated;
+            [argTypeUpdated, callee.dtype.params[i]] = ty.tryUpdate(
+              callee.dtype.params[i],
+              argType,
+              "Function argument type is different.",
+            );
+            return argUpdated || argTypeUpdated;
+          })
+          .some((x) => x);
+
+        return [resTypeUpdated || argsUpdated, callee.dtype.res];
+      }
+    }
+  }
 }

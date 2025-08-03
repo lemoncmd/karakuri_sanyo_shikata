@@ -80,7 +80,6 @@ export type Expr =
 
 export type CallExpr = {
   type: "call";
-  dtype: FuncType;
   args: Expr[];
   funcname: string;
 };

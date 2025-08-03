@@ -40,3 +40,25 @@ export function concatType(ty1: Type, ty2: Type): Type | null {
   if (params.includes(null)) return null;
   return { type: "func", params: params as Type[], res };
 }
+
+export function tryUpdate<T>(
+  base: Type,
+  override: Type,
+  err: T,
+): [boolean, Type] {
+  if (override.type === "unknown") return [false, base];
+  if (base.type === "unknown") return [true, override];
+  if (base.type !== override.type) throw err;
+  if (!(base.type === "func" && override.type === "func")) return [false, base];
+  if (base.params.length !== override.params.length) throw err;
+  const [resUpdated, res] = tryUpdate(base.res, override.res, err);
+  const paramsAndUpdates = base.params.map((ty, i) =>
+    tryUpdate(ty, override.params[i], err),
+  );
+  const paramUpdated = paramsAndUpdates
+      .map(([update, _]) => update)
+      .some((x) => x),
+    params = paramsAndUpdates.map(([_, param]) => param);
+  if (!resUpdated && !paramUpdated) return [false, base];
+  return [true, { type: "func", res, params }];
+}
