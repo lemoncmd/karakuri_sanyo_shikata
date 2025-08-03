@@ -1,3 +1,4 @@
+import { InlineStmt } from "./ast";
 import { FuncType, Type } from "./type";
 
 export type TypedASTType = Map<string, Func>;
@@ -18,6 +19,7 @@ export type Statement =
   | DeclareStmt
   | AssignStmt
   | CallStmt
+  | InlineStmt
   | IfStmt
   | ForStmt
   | WhileStmt;

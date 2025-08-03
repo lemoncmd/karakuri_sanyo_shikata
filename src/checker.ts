@@ -159,6 +159,8 @@ class Checker {
           type: "call",
           call: this.constructExpr(stmt)[0] as typed_ast.CallExpr,
         };
+      case "inline":
+        return stmt;
     }
   }
   constructExpr(expr: ast.Expr): [typed_ast.Expr, ty.Type] {
@@ -286,6 +288,8 @@ class Checker {
       }
       case "call":
         return this.deduceExprType(stmt.call, { type: "unknown" })[0];
+      case "inline":
+        return false;
       case "if": {
         const condsUpdated = stmt.conds
           .map((cond) => {

@@ -262,3 +262,20 @@ test("型之異なる初期値を以変数に不可蓄", () => {
     `),
   ).toThrow("初期値と変数之型相異候");
 });
+test("南蛮人之台詞", () => {
+  const module = requireFromString(
+    compile(`
+一、文句甲、文句乙を以続け書之儀
+南蛮人、訶陵国台詞にて
+甲 = 甲 + 乙;
+と申上候て
+甲を差戻し候
+続け書之儀仍如件
+    `),
+  );
+  expect(typeof module.続け書).toBe("function");
+  expect(module.続け書).not.toThrow();
+  expect(module.続け書("びっくり下谷の", "広徳寺")).toBe(
+    "びっくり下谷の広徳寺",
+  );
+});

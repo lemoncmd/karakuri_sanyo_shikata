@@ -56,6 +56,9 @@ class Generator {
       case "call":
         this.println(`${this.generateExpr(stmt.call)};`);
         break;
+      case "inline":
+        this.println(stmt.content);
+        break;
       case "if":
         stmt.conds.forEach((cond) => {
           this.println(`if (${this.generateExpr(cond.cond)}) {`);

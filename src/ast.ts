@@ -19,6 +19,7 @@ export type Statement =
   | DeclareStmt
   | AssignStmt
   | CallExpr
+  | InlineStmt
   | IfStmt
   | ForStmt
   | WhileStmt;
@@ -40,6 +41,10 @@ export type AssignStmt = {
   type: "assign";
   name: string;
   value: Expr;
+};
+export type InlineStmt = {
+  type: "inline";
+  content: string;
 };
 export type IfStmt = {
   type: "if";
