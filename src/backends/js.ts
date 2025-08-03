@@ -109,6 +109,8 @@ class Generator {
         return `"${expr.value}"`;
       case "bool":
         return `${expr.value}`;
+      case "number":
+        return `${expr.value}`;
       case "ident":
         return `${expr.variable.name}`;
       case "and":

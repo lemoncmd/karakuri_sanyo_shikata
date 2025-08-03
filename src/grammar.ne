@@ -46,6 +46,7 @@ ARGS -> (VALUE "、" {% id %}):* VALUE {% d => [...d[0], d[1]] %}
 VALUE ->
   BOOL_LITERAL {% id %}
 | STRING_LITERAL {% id %}
+| NUMBER_LITERAL {% id %}
 | IDENT {% d => ({type: "ident", name: d[0]}) %}
 | CONDITION_EXPRESSION "候や否や" {% id %}
 | FUNC_CALL_ITASHI "候段" {% id %}
@@ -71,6 +72,8 @@ BOOL_LITERAL ->
 
 STRING_LITERAL -> "〽" [^\s〽、候云]:* {% d => ({type: "string", value: d[1].join("")}) %}
 
-IDENT -> [^\s〽、陰陽儀或候以]:+ {% d => d[0].join("") %}
+NUMBER_LITERAL -> [零壱弐参肆伍陸漆捌玖拾佰仟萬億兆]:+ {% d => ({type: "number", value: d[0].join("")}) %}
+
+IDENT -> [^\s〽、陰陽儀或候以零壱弐参肆伍陸漆捌玖拾佰仟萬億兆]:+ {% d => d[0].join("") %}
 
 _ -> [\s]:*     {% d => null %}

@@ -46,3 +46,15 @@ test("無御座変数不可見", () => {
     `),
   ).toThrow("変数乙不被見出候");
 });
+test("数を差戻関数", () => {
+  const module = requireFromString(
+    compile(`
+一、値之儀
+壱億仟弐拾陸萬佰拾を差戻し候
+値之儀仍如件
+    `),
+  );
+  expect(typeof module.値).toBe("function");
+  expect(module.値).not.toThrow();
+  expect(module.値()).toBe(110260110);
+});

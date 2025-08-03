@@ -19,6 +19,63 @@ function convertDType(type: ast.DType): ty.Type {
   }
 }
 
+function parseNumber(str: string): number | null {
+  const digitMap: Record<string, number> = {
+    零: 0,
+    壱: 1,
+    弐: 2,
+    参: 3,
+    肆: 4,
+    伍: 5,
+    陸: 6,
+    漆: 7,
+    捌: 8,
+    玖: 9,
+  };
+
+  const unitMap: Record<string, number> = {
+    拾: 10,
+    佰: 100,
+    仟: 1000,
+  };
+
+  const groupUnitMap: Record<string, number> = {
+    萬: 1e4,
+    億: 1e8,
+    兆: 1e12,
+  };
+
+  let total = 0;
+  let groupValue = 0;
+  let sectionValue = 0;
+  let lastDigit = 0;
+
+  const chars = str.split("");
+
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i];
+
+    if (digitMap.hasOwnProperty(ch)) {
+      lastDigit = digitMap[ch];
+    } else if (unitMap.hasOwnProperty(ch)) {
+      sectionValue += (lastDigit || 1) * unitMap[ch];
+      lastDigit = 0;
+    } else if (groupUnitMap.hasOwnProperty(ch)) {
+      sectionValue += lastDigit;
+      groupValue += sectionValue * groupUnitMap[ch];
+      sectionValue = 0;
+      lastDigit = 0;
+    } else if (ch === "零") {
+      lastDigit = 0;
+    } else {
+      return null;
+    }
+  }
+
+  total = groupValue + sectionValue + lastDigit;
+  return total;
+}
+
 type Block = Map<string, typed_ast.Var>;
 class Checker {
   funcs: typed_ast.TypedASTType = new Map();
@@ -213,6 +270,13 @@ class Checker {
         return [expr, { type: "bool" }];
       case "string":
         return [expr, { type: "string" }];
+      case "number": {
+        const num = parseNumber(expr.value);
+        if (num === null) {
+          throw "The number literal is illegal. 数之表現奇怪に御座候";
+        }
+        return [{ type: "number", value: num }, { type: "number" }];
+      }
       case "ident": {
         const variable = this.findVar(expr.name);
         if (variable === null) {
@@ -386,6 +450,12 @@ class Checker {
           { type: "bool" },
           hint,
           "The expression wasn't expected to be bool. 陰陽不可用",
+        );
+      case "number":
+        return ty.tryUpdate(
+          { type: "number" },
+          hint,
+          "The expression wasn't expected to be number. 数不可用",
         );
       case "ident": {
         let updated;

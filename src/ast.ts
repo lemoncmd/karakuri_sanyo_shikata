@@ -73,6 +73,7 @@ export type WhileStmt = {
 export type Expr =
   | BoolLiteral
   | StringLiteral
+  | NumberLiteral
   | Ident
   | AndExpr
   | OrExpr
@@ -141,6 +142,10 @@ export type BoolLiteral = {
 };
 export type StringLiteral = {
   type: "string";
+  value: string;
+};
+export type NumberLiteral = {
+  type: "number";
   value: string;
 };
 export type Ident = {
