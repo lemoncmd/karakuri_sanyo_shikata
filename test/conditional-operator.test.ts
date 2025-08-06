@@ -1,7 +1,7 @@
 import { compile } from "../src/lib.ts";
 import requireFromString from "require-from-string";
 
-test("或陰陽、別之陰陽に御座候や否やを問関数", () => {
+test("或陰陽、別之陰陽に御座候や否やを問函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲、陰陽乙を以御座之儀
@@ -16,7 +16,7 @@ test("或陰陽、別之陰陽に御座候や否やを問関数", () => {
   expect(module.御座(false, true)).toBe(false);
   expect(module.御座(false, false)).toBe(true);
 });
-test("或文句、別之文句に御座候や否やを問関数", () => {
+test("或文句、別之文句に御座候や否やを問函数", () => {
   const module = requireFromString(
     compile(`
 一、文句甲、文句乙を以御座之儀
@@ -38,7 +38,7 @@ test("或陰陽、別之文句に御座候や否や者不可問", () => {
     `),
   ).toThrow("左式と右式之型相異候");
 });
-test("或陰陽、別之陰陽に無御座候や否やを問関数", () => {
+test("或陰陽、別之陰陽に無御座候や否やを問函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲、陰陽乙を以無御座之儀
@@ -53,7 +53,7 @@ test("或陰陽、別之陰陽に無御座候や否やを問関数", () => {
   expect(module.無御座(false, true)).toBe(true);
   expect(module.無御座(false, false)).toBe(false);
 });
-test("或文句、別之文句に無御座候や否やを問関数", () => {
+test("或文句、別之文句に無御座候や否やを問函数", () => {
   const module = requireFromString(
     compile(`
 一、文句甲、文句乙を以無御座之儀
@@ -66,7 +66,7 @@ test("或文句、別之文句に無御座候や否やを問関数", () => {
   expect(module.無御座("山", "山")).toBe(false);
   expect(module.無御座("山", "川")).toBe(true);
 });
-test("或陰陽且別之陰陽を問関数", () => {
+test("或陰陽且別之陰陽を問函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲、陰陽乙を以且之儀
@@ -81,7 +81,7 @@ test("或陰陽且別之陰陽を問関数", () => {
   expect(module.且(false, true)).toBe(false);
   expect(module.且(false, false)).toBe(false);
 });
-test("或陰陽又ハ別之陰陽を問関数", () => {
+test("或陰陽又ハ別之陰陽を問函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲、陰陽乙を以又ハ之儀
@@ -96,7 +96,7 @@ test("或陰陽又ハ別之陰陽を問関数", () => {
   expect(module.又ハ(false, true)).toBe(true);
   expect(module.又ハ(false, false)).toBe(false);
 });
-test("或陰陽ニ非事を問関数", () => {
+test("或陰陽ニ非事を問函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲を以非之儀

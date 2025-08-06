@@ -1,7 +1,7 @@
 import { compile } from "../src/lib.ts";
 import requireFromString from "require-from-string";
 
-test("陽を差戻関数", () => {
+test("陽を差戻函数", () => {
   const module = requireFromString(
     compile(`
 一、値之儀
@@ -13,7 +13,7 @@ test("陽を差戻関数", () => {
   expect(module.値).not.toThrow();
   expect(module.値()).toBe(true);
 });
-test("文句を差戻関数", () => {
+test("文句を差戻函数", () => {
   const module = requireFromString(
     compile(`
 一、値之儀
@@ -25,7 +25,7 @@ test("文句を差戻関数", () => {
   expect(module.値).not.toThrow();
   expect(module.値()).toBe("あヽ佳き天気");
 });
-test("陰を諄く差戻関数", () => {
+test("陰を諄く差戻函数", () => {
   const module = requireFromString(
     compile(`
 一、値之儀
@@ -46,7 +46,7 @@ test("無御座変数不可見", () => {
     `),
   ).toThrow("変数乙不被見出候");
 });
-test("数を差戻関数", () => {
+test("数を差戻函数", () => {
   const module = requireFromString(
     compile(`
 一、値之儀

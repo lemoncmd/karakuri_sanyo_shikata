@@ -405,7 +405,7 @@ class Checker {
         [callTypeUpdated, stmt.variable.dtype] = ty.tryUpdate(
           stmt.variable.dtype,
           callType,
-          `Function ${stmt.call.funcname} which is called every end of loop returns differnt type. 毎々終に被呼関数${stmt.call.funcname}異る型返賜候`,
+          `Function ${stmt.call.funcname} which is called every end of loop returns differnt type. 毎々終に被呼函数${stmt.call.funcname}異る型返賜候`,
         );
 
         const bodyUpdated = stmt.body
@@ -536,13 +536,13 @@ class Checker {
       case "call": {
         const callee = this.funcs.get(expr.funcname);
         if (typeof callee === "undefined")
-          throw `Function ${expr.funcname} not found. 関数${expr.funcname}不被見出候`;
+          throw `Function ${expr.funcname} not found. 函数${expr.funcname}不被見出候`;
 
         let resTypeUpdated;
         [resTypeUpdated, callee.dtype.res] = ty.tryUpdate(
           callee.dtype.res,
           hint,
-          "Usage of function return type is different. 関数之被使様相異候",
+          "Usage of function return type is different. 函数之被使様相異候",
         );
 
         const argsUpdated = expr.args
