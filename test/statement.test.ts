@@ -1,7 +1,7 @@
 import { compile } from "../src/lib.ts";
 import requireFromString from "require-from-string";
 
-test("陽や否やを尋候関数", () => {
+test("陽や否やを尋候函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲を以真偽之儀
@@ -16,7 +16,7 @@ test("陽や否やを尋候関数", () => {
   expect(module.真偽(true)).toBe("これぢや");
   expect(module.真偽(false)).toBe("これぢやあらぬ");
 });
-test("陽や否やを尋候関数弐", () => {
+test("陽や否やを尋候函数弐", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲を以真偽之儀
@@ -33,7 +33,7 @@ test("陽や否やを尋候関数弐", () => {
   expect(module.真偽(true)).toBe("これぢや");
   expect(module.真偽(false)).toBe("これぢやあらぬ");
 });
-test("選び候関数", () => {
+test("選び候函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲、陰陽乙を以真偽之儀
@@ -51,7 +51,7 @@ test("選び候関数", () => {
   expect(module.真偽(false, true)).toBe("ふたつめ");
   expect(module.真偽(false, false)).toBe("なんぢや");
 });
-test("選び候関数弐", () => {
+test("選び候函数弐", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲、陰陽乙を以真偽之儀
@@ -82,7 +82,7 @@ test("文句を不可尋", () => {
     `),
   ).toThrow("条件式陰陽に無御座候");
 });
-test("不回関数", () => {
+test("不回函数", () => {
   const module = requireFromString(
     compile(`
 一、回之儀
@@ -107,7 +107,7 @@ test("文句を不可回", () => {
     `),
   ).toThrow("条件式陰陽に無御座候");
 });
-test("一回関数", () => {
+test("一回函数", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲を以子之儀

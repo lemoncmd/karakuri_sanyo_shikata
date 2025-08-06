@@ -157,7 +157,7 @@ class Checker {
         const conds = stmt.conds.map((condition): typed_ast.Condition => {
           const [cond, type] = this.constructExpr(condition.cond);
           if (!["unknown", "bool"].includes(type.type)) {
-            throw "The condtional expression is not bool. 条件式陰陽に無御座候";
+            throw "The conditional expression is not bool. 条件式陰陽に無御座候";
           }
           this.scope.push(new Map());
           const body = condition.body
@@ -202,7 +202,7 @@ class Checker {
       case "while": {
         const [cond, type] = this.constructExpr(stmt.cond);
         if (!["unknown", "bool"].includes(type.type)) {
-          throw "The condtional expression is not bool. 条件式陰陽に無御座候";
+          throw "The conditional expression is not bool. 条件式陰陽に無御座候";
         }
         this.scope.push(new Map());
         const body = stmt.body
@@ -238,17 +238,17 @@ class Checker {
         const [left, leftType] = this.constructExpr(expr.left);
         const [right, rightType] = this.constructExpr(expr.right);
         if (!["unknown", "bool"].includes(leftType.type)) {
-          throw "The left condtional expression is not bool. 左条件式陰陽に無御座候";
+          throw "The left conditional expression is not bool. 左条件式陰陽に無御座候";
         }
         if (!["unknown", "bool"].includes(rightType.type)) {
-          throw "The right condtional expression is not bool. 右条件式陰陽に無御座候";
+          throw "The right conditional expression is not bool. 右条件式陰陽に無御座候";
         }
         return [{ type: expr.type, left, right }, { type: "bool" }];
       }
       case "not": {
         const [value, type] = this.constructExpr(expr.value);
         if (!["unknown", "bool"].includes(type.type)) {
-          throw "The condtional expression is not bool. 条件式陰陽に無御座候";
+          throw "The conditional expression is not bool. 条件式陰陽に無御座候";
         }
         return [{ type: expr.type, value }, { type: "bool" }];
       }
@@ -361,7 +361,7 @@ class Checker {
               type: "bool",
             });
             if (type.type !== "bool")
-              throw "The condtional expression is not bool. 条件式陰陽に無御座候";
+              throw "The conditional expression is not bool. 条件式陰陽に無御座候";
 
             const bodyUpdated = cond.body
               .map((stmt) => this.deduceStmtType(stmt))
@@ -405,7 +405,7 @@ class Checker {
         [callTypeUpdated, stmt.variable.dtype] = ty.tryUpdate(
           stmt.variable.dtype,
           callType,
-          `Function ${stmt.call.funcname} which is called every end of loop returns differnt type. 毎々終に被呼関数${stmt.call.funcname}異る型返賜候`,
+          `Function ${stmt.call.funcname} which is called at every end of the loop returns different types. 毎々終に被呼函数${stmt.call.funcname}異る型返賜候`,
         );
 
         const bodyUpdated = stmt.body
@@ -426,7 +426,7 @@ class Checker {
           type: "bool",
         });
         if (type.type !== "bool")
-          throw "The condtional expression is not bool. 条件式陰陽に無御座候";
+          throw "The conditional expression is not bool. 条件式陰陽に無御座候";
 
         const bodyUpdated = stmt.body
           .map((stmt) => this.deduceStmtType(stmt))
@@ -471,13 +471,13 @@ class Checker {
           type: "bool",
         });
         if (!["unknown", "bool"].includes(leftType.type)) {
-          throw "The left condtional expression is not bool. 左条件式陰陽に無御座候";
+          throw "The left conditional expression is not bool. 左条件式陰陽に無御座候";
         }
         const [rightUpdate, rightType] = this.deduceExprType(expr.right, {
           type: "bool",
         });
         if (!["unknown", "bool"].includes(rightType.type)) {
-          throw "The right condtional expression is not bool. 右条件式陰陽に無御座候";
+          throw "The right conditional expression is not bool. 右条件式陰陽に無御座候";
         }
         if (!["unknown", "bool"].includes(hint.type)) {
           throw "The expression wasn't expected to be bool. 陰陽不可用";
@@ -489,7 +489,7 @@ class Checker {
           type: "bool",
         });
         if (!["unknown", "bool"].includes(type.type)) {
-          throw "The left condtional expression is not bool. 左条件式陰陽に無御座候";
+          throw "The left conditional expression is not bool. 左条件式陰陽に無御座候";
         }
         if (!["unknown", "bool"].includes(hint.type)) {
           throw "The expression wasn't expected to be bool. 陰陽不可用";
@@ -536,13 +536,13 @@ class Checker {
       case "call": {
         const callee = this.funcs.get(expr.funcname);
         if (typeof callee === "undefined")
-          throw `Function ${expr.funcname} not found. 関数${expr.funcname}不被見出候`;
+          throw `Function ${expr.funcname} not found. 函数${expr.funcname}不被見出候`;
 
         let resTypeUpdated;
         [resTypeUpdated, callee.dtype.res] = ty.tryUpdate(
           callee.dtype.res,
           hint,
-          "Usage of function return type is different. 関数之被使様相異候",
+          "Usage of function return type is different. 函数之被使様相異候",
         );
 
         const argsUpdated = expr.args

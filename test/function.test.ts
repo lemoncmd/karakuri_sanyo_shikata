@@ -1,7 +1,7 @@
 import { compile } from "../src/lib.ts";
 import requireFromString from "require-from-string";
 
-test("何も不為関数", () => {
+test("何も不為函数", () => {
   const module = requireFromString(
     compile(`
 一、無之儀
@@ -12,7 +12,7 @@ test("何も不為関数", () => {
   expect(typeof module.無).toBe("function");
   expect(module.無).not.toThrow();
 });
-test("何も不辺関数呼付", () => {
+test("何も不辺函数呼付", () => {
   const module = requireFromString(
     compile(`
 一、無之儀
@@ -26,33 +26,33 @@ test("何も不辺関数呼付", () => {
   expect(typeof module.子).toBe("function");
   expect(module.子).not.toThrow();
 });
-test("単変数関数", () => {
+test("単変数函数", () => {
   const module = requireFromString(
     compile(`
-一、陰陽甲を以単変数関数之儀
+一、陰陽甲を以単変数函数之儀
 甲を差戻し候
-単変数関数之儀仍如件
+単変数函数之儀仍如件
     `),
   );
-  expect(typeof module.単変数関数).toBe("function");
-  expect(module.単変数関数).not.toThrow();
-  expect(module.単変数関数(true)).toBe(true);
-  expect(module.単変数関数(false)).toBe(false);
+  expect(typeof module.単変数函数).toBe("function");
+  expect(module.単変数函数).not.toThrow();
+  expect(module.単変数函数(true)).toBe(true);
+  expect(module.単変数函数(false)).toBe(false);
 });
-test("多変数関数", () => {
+test("多変数函数", () => {
   const module = requireFromString(
     compile(`
-一、陰陽甲、文句乙を以多変数関数之儀
+一、陰陽甲、文句乙を以多変数函数之儀
 乙を差戻し候
-多変数関数之儀仍如件
+多変数函数之儀仍如件
     `),
   );
-  expect(typeof module.多変数関数).toBe("function");
-  expect(module.多変数関数).not.toThrow();
-  expect(module.多変数関数(true, "foo")).toBe("foo");
-  expect(module.多変数関数(false, "bar")).toBe("bar");
+  expect(typeof module.多変数函数).toBe("function");
+  expect(module.多変数函数).not.toThrow();
+  expect(module.多変数函数(true, "foo")).toBe("foo");
+  expect(module.多変数函数(false, "bar")).toBe("bar");
 });
-test("単変数関数呼付", () => {
+test("単変数函数呼付", () => {
   const module = requireFromString(
     compile(`
 一、陰陽甲を以子之儀
@@ -69,7 +69,7 @@ test("単変数関数呼付", () => {
   expect(module.丑(true)).toBe(true);
   expect(module.丑(false)).toBe(false);
 });
-test("多変数関数呼付", () => {
+test("多変数函数呼付", () => {
   const module = requireFromString(
     compile(`
 一、文句甲、文句乙、文句丙を以子之儀
@@ -95,7 +95,7 @@ test("相異る型之値不可差戻", () => {
     `),
   ).toThrow("戻値之型先と相異候");
 });
-test("再帰関数", () => {
+test("再帰函数", () => {
   const module = requireFromString(
     compile(`
 一、数甲を以ひぼなつち之儀
