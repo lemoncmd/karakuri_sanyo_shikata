@@ -6,7 +6,7 @@
 
 ```
 一、ひずばず之儀
-毎々数甲を壱ゟ陌迄足し候乍
+毎々数甲を壱ゟ佰迄足し候乍
 　若甲、拾伍を以剰余之儀を致し候段、零に御座候ハヽ
 　　〽ひずばずを以て書附之儀を致し候て
 　不然若甲、伍を以剰余之儀を致し候段、零に御座候ハヽ
@@ -47,3 +47,7 @@ $ npx ts-node src/main.ts path/to/sourcecode.kss
 ```bash
 $ npx jest
 ```
+
+## 外様絡
+
+- [内核虚擬機探検隊にて発表致候段](https://drive.google.com/file/d/1G1_XYhIkj6In17V_ZoStBd7i-AJuUmf0/view?usp=sharing)
