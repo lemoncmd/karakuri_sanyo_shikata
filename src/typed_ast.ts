@@ -70,6 +70,7 @@ export type Expr =
   | StringLiteral
   | NumberLiteral
   | Ident
+  | ArrayAccessExpr
   | AndExpr
   | OrExpr
   | NotExpr
@@ -136,6 +137,12 @@ export type LeExpr = {
   dtype: Type;
   left: Expr;
   right: Expr;
+};
+export type ArrayAccessExpr = {
+  type: "array_access";
+  baseType: Type;
+  value: Expr;
+  index: Expr;
 };
 export type BoolLiteral = {
   type: "bool";

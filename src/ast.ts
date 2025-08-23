@@ -1,3 +1,5 @@
+import { Type } from "./type";
+
 export type ASTType = Func[];
 
 export type Func = {
@@ -7,11 +9,9 @@ export type Func = {
   body: Statement[];
 };
 export type Param = {
-  dtype: DType;
+  dtype: Type;
   name: string;
 };
-
-export type DType = "数" | "文句" | "陰陽";
 
 export type Statement =
   | NoneStmt
@@ -33,7 +33,7 @@ export type ReturnStmt = {
 };
 export type DeclareStmt = {
   type: "declare";
-  dtype: DType;
+  dtype: Type;
   name: string;
   value: Expr | null;
 };
@@ -57,7 +57,7 @@ export type Condition = {
 };
 export type ForStmt = {
   type: "for";
-  dtype: DType;
+  dtype: Type;
   name: string;
   init: Expr;
   end: Expr;
@@ -75,6 +75,7 @@ export type Expr =
   | StringLiteral
   | NumberLiteral
   | Ident
+  | ArrayAccessExpr
   | AndExpr
   | OrExpr
   | NotExpr
@@ -135,6 +136,11 @@ export type LeExpr = {
   type: "le";
   left: Expr;
   right: Expr;
+};
+export type ArrayAccessExpr = {
+  type: "array_access";
+  value: Expr;
+  index: Expr;
 };
 export type BoolLiteral = {
   type: "bool";

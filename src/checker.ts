@@ -8,17 +8,6 @@ export function check(tree: ast.ASTType): typed_ast.TypedASTType {
   return checker.funcs;
 }
 
-function convertDType(type: ast.DType): ty.Type {
-  switch (type) {
-    case "数":
-      return { type: "number" };
-    case "文句":
-      return { type: "string" };
-    case "陰陽":
-      return { type: "bool" };
-  }
-}
-
 function parseNumber(str: string): number | null {
   const digitMap: Record<string, number> = {
     零: 0,
@@ -87,7 +76,7 @@ class Checker {
   }
   constructFunc(func: ast.Func) {
     const params: typed_ast.Var[] = func.params.map((param) => ({
-      dtype: convertDType(param.dtype),
+      dtype: param.dtype,
       name: param.name,
     }));
     const functype: ty.FuncType = {
@@ -126,7 +115,7 @@ class Checker {
             ? this.constructExpr(stmt.value)
             : [null, { type: "unknown" } as ty.UnknownType];
 
-        const concatType = ty.concatType(type, convertDType(stmt.dtype));
+        const concatType = ty.concatType(type, stmt.dtype);
         if (concatType === null) {
           throw "The initial value and the type of the variable is different. 初期値と変数之型相異候";
         }
@@ -180,7 +169,7 @@ class Checker {
       case "for": {
         const variable: typed_ast.Var = {
           name: stmt.name,
-          dtype: convertDType(stmt.dtype),
+          dtype: stmt.dtype,
         };
         const [init, initType] = this.constructExpr(stmt.init);
         if (ty.concatType(variable.dtype, initType) === null) {
@@ -265,6 +254,19 @@ class Checker {
           throw "The type of the expressions is different. 左式と右式之型相異候";
         }
         return [{ type: expr.type, left, right, dtype }, { type: "bool" }];
+      }
+      case "array_access": {
+        const [value, valueType] = this.constructExpr(expr.value);
+        const [index, indexType] = this.constructExpr(expr.index);
+        if (!["unknown", "array"].includes(valueType.type)) {
+          throw "The value accessed by number index must be an array. 数を以て被読候値、列に無御座候";
+        }
+        if (!["unknown", "number"].includes(indexType.type)) {
+          throw "The index of array access is not number. 列の番号数に無御座候";
+        }
+        const baseType: ty.Type =
+          valueType.type == "array" ? valueType.base : { type: "unknown" };
+        return [{ type: "array_access", baseType, value, index }, baseType];
       }
       case "bool":
         return [expr, { type: "bool" }];
@@ -464,6 +466,36 @@ class Checker {
           hint,
           "The expression wasn't expected to be bool. 陰陽不可用",
         ));
+      }
+      case "array_access": {
+        const [indexUpdated, indexType] = this.deduceExprType(expr.index, {
+          type: "number",
+        });
+        if (!["unknown", "number"].includes(indexType.type)) {
+          throw "The index of array access is not number. 列の番号数に無御座候";
+        }
+        let typeUpdated1, typeUpdated2;
+        [typeUpdated1, expr.baseType] = ty.tryUpdate(
+          expr.baseType,
+          hint,
+          "foobar",
+        );
+        const [valueUpdated, valueType] = this.deduceExprType(expr.value, {
+          type: "array",
+          base: expr.baseType,
+        });
+        if (valueType.type !== "array") {
+          throw "The value accessed by number index must be an array. 数を以て被読候値、列に無御座候";
+        }
+        [typeUpdated2, expr.baseType] = ty.tryUpdate(
+          expr.baseType,
+          valueType.base,
+          "",
+        );
+        return [
+          indexUpdated || typeUpdated1 || typeUpdated2 || valueUpdated,
+          expr.baseType,
+        ];
       }
       case "and":
       case "or": {

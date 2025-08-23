@@ -113,6 +113,8 @@ class Generator {
         return `${expr.value}`;
       case "ident":
         return `${expr.variable.name}`;
+      case "array_access":
+        return `(${this.generateExpr(expr.value)})[(${this.generateExpr(expr.index)}) - 1]`;
       case "and":
         return `(${this.generateExpr(expr.left)}) && (${this.generateExpr(expr.right)})`;
       case "or":

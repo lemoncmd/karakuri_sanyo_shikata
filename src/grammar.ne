@@ -8,7 +8,11 @@ FUNC -> "一、" (PARAMS "を以" {% id %}):? IDENT "之儀" _ STATEMENTS _ IDEN
 
 PARAMS -> (TYPE IDENT "、" {% d => d %}):* TYPE IDENT {% d => [...d[0], d.slice(1)].map(x => ({dtype: x[0], name: x[1]})) %}
 
-TYPE -> "数" {% id %} | "文句" {% id %} | "陰陽" {% id %}
+TYPE ->
+  "数" {% d => ({type: "number"}) %}
+| "文句" {% d => ({type: "string"}) %}
+| "陰陽" {% d => ({type: "bool"}) %}
+| TYPE "之列" {% d => ({type: "array", base: d[0]}) %}
 
 STATEMENTS -> (STATEMENT_WITH_TE {% id %} | STATEMENT_WITH_KOTO {% id %}):* STATEMENT {% d => [...d[0], d[1]] %}
 STATEMENT_WITH_TE -> STATEMENT "て" _ {% d => d[0] %}
@@ -50,6 +54,7 @@ VALUE ->
 | IDENT {% d => ({type: "ident", name: d[0]}) %}
 | CONDITION_EXPRESSION "候や否や" {% id %}
 | FUNC_CALL_ITASHI "候段" {% id %}
+| VALUE "之" VALUE "番目" {% d => ({type: "array_access", value: d[0], index: d[2]}) %}
 
 CONDITION_EXPRESSION ->
   COMPARISON_EXPRESSION "候且" COMPARISON_EXPRESSION   {% d => ({type: "and", left: d[0], right: d[2]}) %}
@@ -74,6 +79,6 @@ STRING_LITERAL -> "〽" [^\s〽、候云]:* {% d => ({type: "string", value: d[1
 
 NUMBER_LITERAL -> [零壱弐参肆伍陸漆捌玖拾佰仟萬億兆]:+ {% d => ({type: "number", value: d[0].join("")}) %}
 
-IDENT -> [^\s〽、陰陽儀或候以零壱弐参肆伍陸漆捌玖拾佰仟萬億兆]:+ {% d => d[0].join("") %}
+IDENT -> [^\s〽、陰陽儀或候以之零壱弐参肆伍陸漆捌玖拾佰仟萬億兆]:+ {% d => d[0].join("") %}
 
 _ -> [\s]:*     {% d => null %}

@@ -3,6 +3,7 @@ export type Type =
   | NumberType
   | StringType
   | BoolType
+  | ArrayType
   | FuncType
   | UnknownType;
 
@@ -20,6 +21,10 @@ export type BoolType = {
 };
 export type UnknownType = {
   type: "unknown";
+};
+export type ArrayType = {
+  type: "array";
+  base: Type;
 };
 export type FuncType = {
   type: "func";
