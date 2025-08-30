@@ -37,7 +37,7 @@ class Generator {
       case "number":
         return "double";
       case "string":
-        return "char *";
+        return "const char *";
       case "bool":
         return "int";
       case "unknown":
