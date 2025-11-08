@@ -534,6 +534,7 @@ class Checker {
         ];
       }
       case "call": {
+        if (expr.funcname === "書附") return [false, { type: "void" }];
         const callee = this.funcs.get(expr.funcname);
         if (typeof callee === "undefined")
           throw `Function ${expr.funcname} not found. 函数${expr.funcname}不被見出候`;
