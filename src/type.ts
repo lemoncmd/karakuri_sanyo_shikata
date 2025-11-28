@@ -4,6 +4,7 @@ export type Type =
   | StringType
   | BoolType
   | FuncType
+  | ParamType
   | UnknownType;
 
 export type VoidType = {
@@ -25,6 +26,10 @@ export type FuncType = {
   type: "func";
   params: Type[];
   res: Type;
+};
+export type ParamType = {
+  type: "param";
+  id: number;
 };
 
 export function concatType(ty1: Type, ty2: Type): Type | null {
@@ -61,4 +66,54 @@ export function tryUpdate<T>(
     params = paramsAndUpdates.map(([_, param]) => param);
   if (!resUpdated && !paramUpdated) return [false, base];
   return [true, { type: "func", res, params }];
+}
+
+class UnifyEnv {
+  env: Type[] = [];
+  resolve(ty: Type): Type {
+    if (ty.type === "func") {
+      return {
+        type: "func",
+        params: ty.params.map((x) => this.resolve(x)),
+        res: this.resolve(ty.res),
+      };
+    }
+    if (ty.type === "param") {
+      const paramTy = this.env[ty.id];
+      if (typeof paramTy !== "undefined") {
+        return this.resolve(paramTy);
+      } else {
+        return ty;
+      }
+    }
+    return ty;
+  }
+  unify(ty1_: Type, ty2_: Type): Type {
+    const ty1 = this.resolve(ty1_);
+    const ty2 = this.resolve(ty2_);
+    if (ty1.type === "param" && ty2.type === "param" && ty1.id === ty2.id)
+      return ty1;
+    if (ty1.type === "param") {
+      this.env[ty1.id] = ty2;
+      return ty2;
+    }
+    if (ty2.type === "param") {
+      this.env[ty2.id] = ty1;
+      return ty1;
+    }
+    if (ty1.type === "unknown") return ty2;
+    if (ty2.type === "unknown") return ty1;
+    if (ty1.type === "func" && ty2.type === "func") {
+      if (ty1.params.length !== ty2.params.length) {
+        throw `Failed to unify types. 型寄せに失敗致候`;
+      }
+      const params = ty1.params.map((x, i) => this.unify(x, ty2.params[i]));
+      const res = this.unify(ty1.res, ty2.res);
+      return { type: "func", res, params };
+    }
+    if (ty1.type === ty2.type) {
+      return ty1;
+    }
+    throw `Failed to unify types. 型寄せに失敗致候`;
+  }
 }
