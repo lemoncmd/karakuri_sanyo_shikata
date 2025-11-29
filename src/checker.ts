@@ -8,17 +8,6 @@ export function check(tree: ast.ASTType): typed_ast.TypedASTType {
   return checker.funcs;
 }
 
-function convertDType(type: ast.DType): ty.Type {
-  switch (type) {
-    case "数":
-      return { type: "number" };
-    case "文句":
-      return { type: "string" };
-    case "陰陽":
-      return { type: "bool" };
-  }
-}
-
 function parseNumber(str: string): number | null {
   const digitMap: Record<string, number> = {
     零: 0,
@@ -88,9 +77,21 @@ class Checker {
     tree.forEach((func) => this.constructFuncParams(func));
     tree.forEach((func) => this.constructFunc(func));
   }
+  convertDType(type: ast.DType): ty.Type {
+    switch (type) {
+      case "数":
+        return { type: "number" };
+      case "文句":
+        return { type: "string" };
+      case "陰陽":
+        return { type: "bool" };
+      case "某":
+        return this.unifyEnv.getNewParamTy();
+    }
+  }
   constructFuncParams(func: ast.Func) {
     const params: typed_ast.Var[] = func.params.map((param) => ({
-      dtype: convertDType(param.dtype),
+      dtype: this.convertDType(param.dtype),
       name: param.name,
     }));
     const resTy = this.unifyEnv.getNewParamTy();
@@ -142,7 +143,7 @@ class Checker {
 
         const concatType = this.unifyEnv.unify(
           type,
-          convertDType(stmt.dtype),
+          this.convertDType(stmt.dtype),
           "The initial value and the type of the variable is different. 初期値と変数之型相異候",
         );
         const name = stmt.name;
@@ -198,7 +199,7 @@ class Checker {
       case "for": {
         const variable: typed_ast.Var = {
           name: stmt.name,
-          dtype: convertDType(stmt.dtype),
+          dtype: this.convertDType(stmt.dtype),
         };
         const [init, initType] = this.constructExpr(stmt.init);
         this.unifyEnv.unify(

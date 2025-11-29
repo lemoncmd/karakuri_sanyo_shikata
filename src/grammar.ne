@@ -8,7 +8,7 @@ FUNC -> "一、" (PARAMS "を以" {% id %}):? IDENT "之儀" _ STATEMENTS _ IDEN
 
 PARAMS -> (TYPE IDENT "、" {% d => d %}):* TYPE IDENT {% d => [...d[0], d.slice(1)].map(x => ({dtype: x[0], name: x[1]})) %}
 
-TYPE -> "数" {% id %} | "文句" {% id %} | "陰陽" {% id %}
+TYPE -> "数" {% id %} | "文句" {% id %} | "陰陽" {% id %} | "某" {% id %}
 
 STATEMENTS -> (STATEMENT_WITH_TE {% id %} | STATEMENT_WITH_KOTO {% id %}):* STATEMENT {% d => [...d[0], d[1]] %}
 STATEMENT_WITH_TE -> STATEMENT "て" _ {% d => d[0] %}
