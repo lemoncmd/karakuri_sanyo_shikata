@@ -49,7 +49,11 @@ class Generator {
   generateFunc(func: Func, name: string) {
     let result_type: Type = func.dtype.res;
     this.print(`${this.generateType(result_type)} ${name}(`);
-    this.print(func.params.map((param) => param.name).join(", "));
+    this.print(
+      func.params
+        .map((param) => `${this.generateType(param.dtype)} ${param.name}`)
+        .join(", "),
+    );
     this.println(") {");
     this.indent++;
     func.body.forEach((stmt) => this.generateStmt(stmt));

@@ -20,7 +20,7 @@ STATEMENT ->
 | FUNC_CALL_ITASHI "候" {% id %}
 | (VALUE "と云" {% id %} | "或" {% d => null %}) TYPE "をして" IDENT "と致し候" {% d => ({type: "declare", dtype: d[1], name: d[3], value: d[0]}) %}
 | (VALUE "をして" {% id %} | FUNC_CALL_SITE {% id %}) IDENT "と致し候" {% d => ({type: "assign", name: d[1], value: d[0]}) %}
-| "南蛮人、爪哇国台詞にて" (. {% id %}| "\n" {% id %}):* "と申上候" {% d => ({type: "inline", content: d[1].join("")}) %}
+| ("南蛮人、爪哇国台詞にて" | "南蛮人、椎言葉にて") [^と]:* "と申上候" {% d => ({type: "inline", content: d[1].join("")}) %}
 
 STATEMENT_WITH_KOTO ->
   IF_STATEMENT {% id %}

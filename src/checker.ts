@@ -98,6 +98,7 @@ class Checker {
 
     this.scope.push(new Map(params.map((param) => [param.name, param])));
     this.res_ty = { type: "unknown" };
+    this.has_res = false;
     const body: typed_ast.Statement[] = func.body
       .map((stmt) => this.constructStatement(stmt))
       .filter((stmt) => stmt !== null);
