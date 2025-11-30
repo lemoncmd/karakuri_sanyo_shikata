@@ -63,6 +63,8 @@ export class UnifyEnv {
   ): Type {
     const ty1 = this.resolve(ty1_);
     const ty2 = this.resolve(ty2_);
+    if (ty1.type === "unknown") return ty2;
+    if (ty2.type === "unknown") return ty1;
     if (ty1.type === "param" && ty2.type === "param" && ty1.id === ty2.id)
       return ty1;
     if (ty1.type === "param") {
@@ -73,8 +75,6 @@ export class UnifyEnv {
       this.env[ty2.id] = ty1;
       return ty1;
     }
-    if (ty1.type === "unknown") return ty2;
-    if (ty2.type === "unknown") return ty1;
     if (ty1.type === "func" && ty2.type === "func") {
       if (ty1.params.length !== ty2.params.length) {
         throw errMessage;
