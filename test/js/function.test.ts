@@ -1,4 +1,4 @@
-import { compile } from "../src/lib.ts";
+import { compile } from "../../src/lib.ts";
 import requireFromString from "require-from-string";
 
 test("何も不為函数", () => {

@@ -24,9 +24,10 @@ class Generator {
   }
 
   generate(ast: TypedASTType): string {
+    ast.forEach((func, name) => this.generateFuncPrototype(func, name));
     ast.forEach((func, name) => this.generateFunc(func, name));
     if (this.headers.length > 0) {
-      this.result = this.headers.join("\n\n") + "\n" + this.result;
+      this.result = this.headers.join("\n") + "\n\n" + this.result;
     }
     return this.result;
   }
@@ -37,14 +38,25 @@ class Generator {
       case "number":
         return "double";
       case "string":
-        return "const char *";
+        return "char *";
       case "bool":
-        return "int";
+        return "_Bool";
       case "unknown":
         throw `Internal compiler error: 'unknown' should already be resolved in the frontend`;
       default:
         throw `Unsupported type for C99 backend: ${t.type}`;
     }
+  }
+  generateFuncPrototype(func: Func, name: string) {
+    let result_type: Type = func.dtype.res;
+    this.print(`${this.generateType(result_type)} ${name}(`);
+    this.print(
+      func.params
+        .map((param) => `${this.generateType(param.dtype)} ${param.name}`)
+        .join(", "),
+    );
+    this.println(");");
+    this.println();
   }
   generateFunc(func: Func, name: string) {
     let result_type: Type = func.dtype.res;
@@ -156,8 +168,12 @@ class Generator {
       case "not":
         return `!(${this.generateExpr(expr.value)})`;
       case "eq":
+        if (expr.dtype.type === "string")
+          return `文句之御座(${this.generateExpr(expr.left)}, ${this.generateExpr(expr.right)})`;
         return `(${this.generateExpr(expr.left)}) == (${this.generateExpr(expr.right)})`;
       case "ne":
+        if (expr.dtype.type === "string")
+          return `!文句之御座(${this.generateExpr(expr.left)}, ${this.generateExpr(expr.right)})`;
         return `(${this.generateExpr(expr.left)}) != (${this.generateExpr(expr.right)})`;
       case "gt":
         return `(${this.generateExpr(expr.left)}) > (${this.generateExpr(expr.right)})`;
