@@ -40,6 +40,10 @@ $ npm run build:grammar
 
 ```bash
 $ npx ts-node src/main.ts path/to/sourcecode.kss
+# 源文之儘実行致度候ハヽ
+$ npx ts-node src/main.ts path/to/sourcecode.kss --run
+# 椎言葉を得度候ハヽ
+$ npx ts-node src/main.ts path/to/sourcecode.kss --backend=c
 ```
 
 試験者以下可被為候。
