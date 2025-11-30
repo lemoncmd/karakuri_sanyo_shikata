@@ -32,6 +32,26 @@ export type ParamType = {
   id: number;
 };
 
+export function toString(ty: Type): string {
+  switch (ty.type) {
+    case "string":
+      return "文句";
+    case "number":
+      return "数";
+    case "bool":
+      return "陰陽";
+    case "param":
+      return "某";
+    case "unknown":
+    case "void":
+      return "無";
+    case "func":
+      const param = ty.params.map((param) => toString(param)).join("と");
+      const res = toString(ty.res);
+      return (param ? param + "を以" : "") + res + "を返す函数";
+  }
+}
+
 export class UnifyEnv {
   env: Type[] = [];
   paramCount = 0;

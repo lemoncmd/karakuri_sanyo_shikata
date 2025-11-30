@@ -2,9 +2,13 @@ import * as typed_ast from "./typed_ast";
 import * as ast from "./ast";
 import * as ty from "./type";
 
-export function check(tree: ast.ASTType): typed_ast.TypedASTType {
+export function check(
+  tree: ast.ASTType,
+  expandGenerics = false,
+): typed_ast.TypedASTType {
   const checker = new Checker(tree);
-  checker.applyInferredType();
+  checker.funcs.forEach((func) => applyInferredType(checker.unifyEnv, func));
+  if (expandGenerics) return expandGenericsPass(checker.funcs);
   return checker.funcs;
 }
 
@@ -342,65 +346,71 @@ class Checker {
     }
     return null;
   }
+}
 
-  applyInferredType() {
-    this.funcs.forEach((func) => {
-      func.dtype.res = this.unifyEnv.resolve(func.dtype.res);
-    });
-  }
-  applyInferredTypeToStatement(stmt: typed_ast.Statement) {
+function applyInferredType(unifyEnv: ty.UnifyEnv, func: typed_ast.Func) {
+  func.params.forEach((param) => {
+    param.dtype = unifyEnv.resolve(param.dtype);
+  });
+  func.dtype.params = func.dtype.params.map((type) => unifyEnv.resolve(type));
+  func.dtype.res = unifyEnv.resolve(func.dtype.res);
+  func.body.forEach((stmt) => applyInferredTypeToStatement(stmt));
+  function applyInferredTypeToStatement(stmt: typed_ast.Statement) {
     switch (stmt.type) {
       case "return":
-        this.applyInferredTypeToExpression(stmt.value);
+        applyInferredTypeToExpression(stmt.value);
         return;
       case "declare":
-        stmt.variable.dtype = this.unifyEnv.resolve(stmt.variable.dtype);
+        stmt.variable.dtype = unifyEnv.resolve(stmt.variable.dtype);
         if (stmt.value !== null) {
-          this.applyInferredTypeToExpression(stmt.value);
+          applyInferredTypeToExpression(stmt.value);
         }
         return;
       case "assign":
-        this.applyInferredTypeToExpression(stmt.value);
+        applyInferredTypeToExpression(stmt.value);
         return;
       case "inline":
         return;
       case "if":
         stmt.conds.forEach((cond) => {
-          this.applyInferredTypeToExpression(cond.cond);
-          cond.body.forEach((stmt) => this.applyInferredTypeToStatement(stmt));
+          applyInferredTypeToExpression(cond.cond);
+          cond.body.forEach((stmt) => applyInferredTypeToStatement(stmt));
         });
         if (stmt.else !== null) {
-          stmt.else.forEach((stmt) => this.applyInferredTypeToStatement(stmt));
+          stmt.else.forEach((stmt) => applyInferredTypeToStatement(stmt));
         }
         return;
       case "for":
-        stmt.variable.dtype = this.unifyEnv.resolve(stmt.variable.dtype);
-        this.applyInferredTypeToExpression(stmt.init);
-        this.applyInferredTypeToExpression(stmt.end);
-        this.applyInferredTypeToExpression(stmt.call);
-        stmt.body.forEach((stmt) => this.applyInferredTypeToStatement(stmt));
+        stmt.variable.dtype = unifyEnv.resolve(stmt.variable.dtype);
+        applyInferredTypeToExpression(stmt.init);
+        applyInferredTypeToExpression(stmt.end);
+        applyInferredTypeToExpression(stmt.call);
+        stmt.body.forEach((stmt) => applyInferredTypeToStatement(stmt));
         return;
       case "while":
-        this.applyInferredTypeToExpression(stmt.cond);
-        stmt.body.forEach((stmt) => this.applyInferredTypeToStatement(stmt));
+        applyInferredTypeToExpression(stmt.cond);
+        stmt.body.forEach((stmt) => applyInferredTypeToStatement(stmt));
         return;
       case "call":
-        this.applyInferredTypeToExpression(stmt.call);
+        applyInferredTypeToExpression(stmt.call);
         return;
+      default:
+        const _exhaustiveCheck: never = stmt;
+        throw "unreachable";
     }
   }
-  applyInferredTypeToExpression(expr: typed_ast.Expr) {
+  function applyInferredTypeToExpression(expr: typed_ast.Expr) {
     switch (expr.type) {
       case "ident":
-        expr.variable.dtype = this.unifyEnv.resolve(expr.variable.dtype);
+        expr.variable.dtype = unifyEnv.resolve(expr.variable.dtype);
         return;
       case "and":
       case "or":
-        this.applyInferredTypeToExpression(expr.right);
-        this.applyInferredTypeToExpression(expr.left);
+        applyInferredTypeToExpression(expr.right);
+        applyInferredTypeToExpression(expr.left);
         return;
       case "not":
-        this.applyInferredTypeToExpression(expr.value);
+        applyInferredTypeToExpression(expr.value);
         return;
       case "eq":
       case "ne":
@@ -408,18 +418,137 @@ class Checker {
       case "lt":
       case "ge":
       case "le":
-        expr.dtype = this.unifyEnv.resolve(expr.dtype);
-        this.applyInferredTypeToExpression(expr.right);
-        this.applyInferredTypeToExpression(expr.left);
+        expr.dtype = unifyEnv.resolve(expr.dtype);
+        applyInferredTypeToExpression(expr.right);
+        applyInferredTypeToExpression(expr.left);
         return;
       case "call":
-        expr.dtype = this.unifyEnv.resolve(expr.dtype);
-        expr.args.forEach((arg) => this.applyInferredTypeToExpression(arg));
+        expr.dtype = unifyEnv.resolve(expr.dtype) as ty.FuncType;
+        expr.args.forEach((arg) => applyInferredTypeToExpression(arg));
         return;
       case "string":
       case "number":
       case "bool":
         return;
+      default:
+        const _exhaustiveCheck: never = expr;
+        throw "unreachable";
     }
   }
+}
+
+function expandGenericsPass(
+  ast: typed_ast.TypedASTType,
+): typed_ast.TypedASTType {
+  const [nonGenerics, generics]: [
+    typed_ast.TypedASTType,
+    typed_ast.TypedASTType,
+  ] = ast.entries().reduce(
+    ([ng, g], [k, v]) => {
+      const hasGenericParam = v.params.some(
+        (param) => param.dtype.type === "param",
+      );
+      (hasGenericParam ? g : ng).set(k, v);
+      return [ng, g];
+    },
+    [new Map(), new Map()],
+  );
+  const generatedGenericParams: Map<string, Set<string>> = new Map(
+    generics.keys().map((name) => [name, new Set()]),
+  );
+  function walkStatement(stmt: typed_ast.Statement) {
+    switch (stmt.type) {
+      case "return":
+        walkExpression(stmt.value);
+        break;
+      case "declare":
+        if (stmt.value !== null) walkExpression(stmt.value);
+        break;
+      case "assign":
+        walkExpression(stmt.value);
+        break;
+      case "call":
+        walkExpression(stmt.call);
+        break;
+      case "inline":
+        break;
+      case "if":
+        stmt.conds.forEach((cond) => {
+          walkExpression(cond.cond);
+          cond.body.forEach((stmt) => walkStatement(stmt));
+        });
+        if (stmt.else !== null)
+          stmt.else.forEach((stmt) => walkStatement(stmt));
+        break;
+      case "for":
+        walkExpression(stmt.init);
+        walkExpression(stmt.end);
+        walkExpression(stmt.call);
+        stmt.body.forEach((stmt) => walkStatement(stmt));
+        break;
+      case "while":
+        walkExpression(stmt.cond);
+        stmt.body.forEach((stmt) => walkStatement(stmt));
+        break;
+      default:
+        const _exhaustiveCheck: never = stmt;
+        throw "unreachable";
+    }
+  }
+  function walkExpression(expr: typed_ast.Expr) {
+    switch (expr.type) {
+      case "not":
+        walkExpression(expr.value);
+        break;
+      case "and":
+      case "or":
+      case "eq":
+      case "ne":
+      case "gt":
+      case "lt":
+      case "ge":
+      case "le":
+        walkExpression(expr.left);
+        walkExpression(expr.right);
+        break;
+      case "call": {
+        if (nonGenerics.has(expr.funcname)) break;
+        const func = generics.get(expr.funcname);
+        if (typeof func === "undefined") {
+          throw "unreachable";
+        }
+        const unifyEnv = new ty.UnifyEnv();
+        expr.dtype.params.forEach((param, i) => {
+          unifyEnv.unify(func.dtype.params[i], param);
+        });
+        const typename = unifyEnv.env
+          .filter((_) => true)
+          .map((type) => ty.toString(type))
+          .join("_");
+        const newFuncName = `${expr.funcname}_${typename}`;
+        expr.funcname = newFuncName;
+        if (generatedGenericParams.get(expr.funcname)?.has(typename)) break;
+        if (!generatedGenericParams.has(expr.funcname))
+          generatedGenericParams.set(expr.funcname, new Set(typename));
+        else generatedGenericParams.get(expr.funcname)?.add(typename);
+        const newFunc = structuredClone(func);
+        nonGenerics.set(newFuncName, newFunc);
+        applyInferredType(unifyEnv, newFunc);
+        newFunc.body.forEach((stmt) => walkStatement(stmt));
+        break;
+      }
+      case "string":
+      case "number":
+      case "bool":
+      case "ident":
+        break;
+      default:
+        const _exhaustiveCheck: never = expr;
+        throw "unreachable";
+    }
+  }
+  nonGenerics.values().forEach((nonGeneric) => {
+    nonGeneric.body.forEach((stmt) => walkStatement(stmt));
+  });
+  return nonGenerics;
 }

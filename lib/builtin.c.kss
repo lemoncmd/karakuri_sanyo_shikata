@@ -47,3 +47,24 @@
 と申上候て
 丙を差戻し候
 文句之御座之儀仍如件
+
+一、某甲を以書附之儀
+南蛮人、椎言葉にて前書
+#include <stdio.h>
+#ifndef KAKITSUKE_PRINT_DEF
+#define KAKITSUKE_PRINT_DEF
+void printBool(_Bool a){
+  printf("%s\n", a ? "true" : "false");
+}
+void printDouble(double a){
+  printf("%g\n", a);
+}
+void printString(char* a){
+  printf("%s\n", a);
+}
+#endif
+と申上候て
+南蛮人、椎言葉にて本文
+_Generic(甲, _Bool: printBool, double: printDouble, char*: printString)(甲);
+と申上候
+書附之儀仍如件
