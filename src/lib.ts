@@ -28,7 +28,7 @@ export function compile(source: string, backend: "js" | "c" = "js"): string {
     console.error("what");
   }
   const ast: ASTType = parser.results[0];
-  const typed_ast = check(ast);
+  const typed_ast = check(ast, backend === "c");
   switch (backend) {
     case "js":
       return jsback.generate(typed_ast);

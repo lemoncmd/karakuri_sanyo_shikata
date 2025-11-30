@@ -16,7 +16,7 @@ if (opts.includes("--run")) {
     }
     case "c": {
       const lib = compileAndLoadC(output);
-      lib.func("");
+      lib.func("本丸", "void", [])();
       break;
     }
   }

@@ -1,4 +1,3 @@
-import { InlineStmt } from "./ast";
 import { FuncType, Type } from "./type";
 
 export type TypedASTType = Map<string, Func>;
@@ -64,6 +63,10 @@ export type WhileStmt = {
   cond: Expr;
   body: Statement[];
 };
+export type InlineStmt = {
+  type: "inline";
+  content: string;
+};
 
 export type Expr =
   | BoolLiteral
@@ -84,6 +87,7 @@ export type Expr =
 export type CallExpr = {
   type: "call";
   args: Expr[];
+  dtype: FuncType;
   funcname: string;
 };
 

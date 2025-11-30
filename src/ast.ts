@@ -11,7 +11,7 @@ export type Param = {
   name: string;
 };
 
-export type DType = "数" | "文句" | "陰陽";
+export type DType = "数" | "文句" | "陰陽" | "某";
 
 export type Statement =
   | NoneStmt
