@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@types/require-from-string": "^1.2.3",
+    "koffi": "^2.14.1",
     "nearley": "^2.20.1"
   }
 }

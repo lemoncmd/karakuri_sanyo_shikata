@@ -1,4 +1,4 @@
-import { compile } from "../src/lib.ts";
+import { compile } from "../../src/lib.ts";
 import requireFromString from "require-from-string";
 
 test("陽を差戻函数", () => {

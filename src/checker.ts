@@ -111,6 +111,7 @@ class Checker {
     this.scope.push(
       new Map(typedFunc.params.map((param) => [param.name, param])),
     );
+    this.hasRes = false;
     const body: typed_ast.Statement[] = func.body
       .map((stmt) => this.constructStatement(stmt))
       .filter((stmt) => stmt !== null);

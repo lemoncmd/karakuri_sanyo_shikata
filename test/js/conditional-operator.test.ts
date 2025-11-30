@@ -1,4 +1,4 @@
-import { compile } from "../src/lib.ts";
+import { compile } from "../../src/lib.ts";
 import requireFromString from "require-from-string";
 
 test("或陰陽、別之陰陽に御座候や否やを問函数", () => {
